@@ -15,20 +15,10 @@ jobs:
           host: 13.158.141.196
           username: ec2-user
           key: ${{ secrets.EC2_SSH_KEY }}
+          # 【これだわん！】コマンドを送ったら、結果を待たずに即座にロボットを正常終了させる魔法
+          command_timeout: 30s
           script: |
             cd /home/ec2-user/aws-study-project/my-python-app
             git pull origin master
-            
-            # 既存のuvicornを確実に終了するお守り
             pkill -f uvicorn || true
-            
-            # 【大修正】GitHubのロボットから完全にプロセスを切り離して裏で実行するわん！
-            cat << 'EOF' > start.sh
-            #!/bin/bash
             nohup uvicorn app:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
-            EOF
-            chmod +x start.sh
-            at now -f start.sh || (nohup ./start.sh > /dev/null 2>&1 &)
-            
-            # ロボットに「無事にコマンドを送ったから帰っていいよ」と伝えるためにちょっと待つ
-            sleep 3
