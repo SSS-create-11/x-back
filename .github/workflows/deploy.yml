@@ -1,0 +1,22 @@
+name: Deploy FastAPI to EC2
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: EC2に電撃ワープして全自動で再起動するわん
+        uses: appleboy/ssh-action@master
+        with:
+          host: 13.158.141.196
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ec2-user/aws-study-project/my-python-app
+            git pull origin master
+            pkill -f uvicorn || true
+            nohup uvicorn app:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
