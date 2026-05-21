@@ -34,7 +34,7 @@ def createtweet(tweet:Tweet):
   db.append(tweet)
   save()
   #fastapi側に返す
-  return  {"status":"githubでもvsでもつながったよ"}
+  return  {"status":"完了"}
 #つなぐやり取り口を作る(登録)post
 
 #登録用
