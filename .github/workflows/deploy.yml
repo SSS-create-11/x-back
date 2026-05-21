@@ -18,5 +18,17 @@ jobs:
           script: |
             cd /home/ec2-user/aws-study-project/my-python-app
             git pull origin master
-            pkill -f uvicorn || echo "uvicornは動いていませんでした"
+            
+            # 既存のuvicornを確実に終了するお守り
+            pkill -f uvicorn || true
+            
+            # 【大修正】GitHubのロボットから完全にプロセスを切り離して裏で実行するわん！
+            cat << 'EOF' > start.sh
+            #!/bin/bash
             nohup uvicorn app:app --host 0.0.0.0 --port 8000 > uvicorn.log 2>&1 &
+            EOF
+            chmod +x start.sh
+            at now -f start.sh || (nohup ./start.sh > /dev/null 2>&1 &)
+            
+            # ロボットに「無事にコマンドを送ったから帰っていいよ」と伝えるためにちょっと待つ
+            sleep 3
